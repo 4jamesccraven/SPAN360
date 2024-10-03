@@ -1,2 +1,3 @@
 venv/**
 data_collection/unproccessed_text/**
+*/__pycache__
