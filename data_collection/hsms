@@ -1,0 +1,100 @@
+#!/usr/bin/env python3
+
+import re
+import os
+import warnings
+import logging
+from argparse import ArgumentParser, Namespace
+from collections import defaultdict
+
+import requests
+from bs4 import BeautifulSoup
+from urllib3.exceptions import InsecureRequestWarning
+from tqdm import tqdm
+
+# We're just scraping text, no need to verify
+warnings.simplefilter('ignore', InsecureRequestWarning)
+
+# Initialise logging
+LOGGER = logging.getLogger('hsms')
+LOGGER.setLevel(logging.DEBUG)
+file_handler = logging.FileHandler('hsms.log')
+file_handler.setFormatter(
+    logging.Formatter('%(name)s [%(levelname)s]: %(message)s')
+)
+LOGGER.addHandler(file_handler)
+
+
+def cli() -> Namespace:
+    global gather_task
+
+    parser = ArgumentParser('hsms',
+                            description='util to collect text from HSMS')
+    parser.set_defaults(parser=parser)
+
+    subps = parser.add_subparsers(title='action',
+                                  required=True)
+    gather = subps.add_parser('gather')
+    gather.set_defaults(task=gather_task)
+
+    return parser.parse_args()
+
+
+def gather_task(args: Namespace):
+    global LOGGER
+
+    try:
+        with open('texts.in', 'r', encoding='utf8') as f:
+            texts = [line.strip() for line in f]
+    except FileNotFoundError:
+        args.parser.exit(message='hsms: error: Input file not found. Must specify a file'
+                         ' called `texts.in`.')
+        return
+
+    this_dir = os.path.dirname(os.path.abspath(__file__))
+    output_dir = os.path.join(this_dir, 'unproccessed_text')
+    if not os.path.isdir(output_dir):
+        os.makedirs(output_dir, exist_ok=True)
+
+    file_map: dict[str, int] = {}
+    for text in tqdm(texts, maxinterval=1.0):
+        url = f'https://www.hispanicseminary.org/{text}'
+
+        response = requests.get(url, verify=False)
+
+        if response.status_code != 200:
+            LOGGER.error(f'{url}')
+            return
+
+        soup = BeautifulSoup(response.content, 'html.parser')
+
+        text_body = soup.find(id='selectable')
+
+        if text_body is None:
+            LOGGER.error(f'{url}')
+            return
+
+        text_body = [line.strip() for line in text_body.text.split('\n')[1:]]
+        match = re.fullmatch(r'\{RMK: (.*)\.\}', text_body[0])
+        title = match.group(1) if match else text.split('/')[1]
+        title = title.replace(' ', '_')
+
+        file_map[title] = file_map.get(title, 0) + 1
+
+        write_path = os.path.join(output_dir, title + str(file_map[title]) + '.txt')
+        LOGGER.debug(write_path)
+        try:
+            with open(write_path, 'w', encoding='utf8') as f:
+                f.write('\n'.join(text_body))
+        except Exception as e:
+            LOGGER.error(f'{title} {e}')
+
+
+def main() -> None:
+    args = cli()
+    args.task(args)
+
+
+if __name__ == '__main__':
+    main()
+
