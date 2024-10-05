@@ -1,3 +1,4 @@
 venv/**
 data_collection/unproccessed_text/**
 */__pycache__
+data_collection/hsms.log

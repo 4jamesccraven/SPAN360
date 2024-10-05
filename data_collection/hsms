@@ -5,7 +5,7 @@ import os
 import warnings
 import logging
 from argparse import ArgumentParser, Namespace
-from collections import defaultdict
+from collections.abc import Callable
 
 import requests
 from bs4 import BeautifulSoup
@@ -18,7 +18,7 @@ warnings.simplefilter('ignore', InsecureRequestWarning)
 # Initialise logging
 LOGGER = logging.getLogger('hsms')
 LOGGER.setLevel(logging.DEBUG)
-file_handler = logging.FileHandler('hsms.log')
+file_handler = logging.FileHandler('hsms.log', mode='w')
 file_handler.setFormatter(
     logging.Formatter('%(name)s [%(levelname)s]: %(message)s')
 )
@@ -26,23 +26,26 @@ LOGGER.addHandler(file_handler)
 
 
 def cli() -> Namespace:
-    global gather_task
-
     parser = ArgumentParser('hsms',
                             description='util to collect text from HSMS')
     parser.set_defaults(parser=parser)
-
     subps = parser.add_subparsers(title='action',
                                   required=True)
+
     gather = subps.add_parser('gather')
     gather.set_defaults(task=gather_task)
+
+    clean = subps.add_parser('clean')
+    clean.set_defaults(task=clean_task)
+    clean.add_argument('--compare',
+                       help='Compare the changes to the text before and'
+                            ' after the cleaning.',
+                       action='store_true')
 
     return parser.parse_args()
 
 
 def gather_task(args: Namespace):
-    global LOGGER
-
     try:
         with open('texts.in', 'r', encoding='utf8') as f:
             texts = [line.strip() for line in f]
@@ -88,6 +91,53 @@ def gather_task(args: Namespace):
                 f.write('\n'.join(text_body))
         except Exception as e:
             LOGGER.error(f'{title} {e}')
+
+
+def strfpath(path: str) -> str:
+    with open(path, 'r', encoding='utf8') as f:
+        return '\n'.join([line.strip() for line in f])
+
+
+# Left in global to be imported elsewhere
+CB_PAT = re.compile(r'\{CB\d+\.(.*?)\}', re.DOTALL)
+IN_PAT = re.compile(r'\{IN(.*?)\.\}? ?', re.DOTALL)
+CW_PAT = re.compile(r'\{CW. (.*?) ?\}')
+
+def clean_task(args: Namespace):
+    files = os.listdir('unproccessed_text')
+    files = [os.path.join('unproccessed_text', file) for file in files]
+    files = [os.path.abspath(file) for file in files]
+
+    text = '\n'.join(strfpath(file) for file in files)
+
+    def take_group(x):
+        whole_match = x.group(0)
+        kept = x.group(1)
+        LOGGER.info(whole_match.replace(kept, ''))
+        return kept
+
+    def rm_and_log(x):
+        LOGGER.info(x.group(0))
+        return ''
+
+    SUBSTITUTIONS: dict[re.Pattern, str | Callable] = {
+        CB_PAT: take_group,
+        IN_PAT: rm_and_log,
+        CW_PAT: take_group,
+    }
+
+    cleaned_text = text
+    for pattern, replacement in SUBSTITUTIONS.items():
+        cleaned_text = re.sub(pattern, replacement, cleaned_text)
+
+    try:
+        if args.compare:
+            for raw, clean in zip(text.splitlines(), cleaned_text.splitlines()):
+                print(f'{raw[:99]:<{99}} | {clean}')
+        else:
+            print(cleaned_text)
+    except BrokenPipeError:
+        ...
 
 
 def main() -> None:
