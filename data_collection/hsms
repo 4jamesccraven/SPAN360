@@ -6,6 +6,8 @@ import warnings
 import logging
 from argparse import ArgumentParser, Namespace
 from collections.abc import Callable
+from functools import partial
+from sys import stderr
 
 import requests
 from bs4 import BeautifulSoup
@@ -25,6 +27,13 @@ file_handler.setFormatter(
 LOGGER.addHandler(file_handler)
 
 
+tqdm_wrapper = partial(tqdm,
+                       bar_format='{percentage:3.0f}% [{bar}] {n_fmt}/{total_fmt} [{elapsed}<{remaining}]',
+                       ascii='-=',
+                       maxinterval=1.0,
+                       file=stderr)
+
+
 def cli() -> Namespace:
     parser = ArgumentParser('hsms',
                             description='util to collect text from HSMS')
@@ -32,14 +41,25 @@ def cli() -> Namespace:
     subps = parser.add_subparsers(title='action',
                                   required=True)
 
-    gather = subps.add_parser('gather')
+    gather = subps.add_parser('gather',
+                              help='Gather texts specified in texts.in'
+                                   ' from the Digital Library of the'
+                                   ' HSMS')
     gather.set_defaults(task=gather_task)
 
-    clean = subps.add_parser('clean')
+    clean = subps.add_parser('clean',
+                             help='Clean the data gathered by `gather`'
+                                  ' and print the data to stdout.'
+                                  ' redirect stdout to a file to save.')
     clean.set_defaults(task=clean_task)
     clean.add_argument('--compare',
                        help='Compare the changes to the text before and'
                             ' after the cleaning.',
+                       action='store_true')
+    clean.add_argument('-s', '--show_progress',
+                       help='Print a progress bar to stderr.'
+                            ' not recommended for saving final'
+                            ' output.',
                        action='store_true')
 
     return parser.parse_args()
@@ -48,7 +68,7 @@ def cli() -> Namespace:
 def gather_task(args: Namespace):
     try:
         with open('texts.in', 'r', encoding='utf8') as f:
-            texts = [line.strip() for line in f]
+            texts = [line.strip() for line in f if line.strip()[0] != '#']
     except FileNotFoundError:
         args.parser.exit(message='hsms: error: Input file not found. Must specify a file'
                          ' called `texts.in`.')
@@ -60,7 +80,7 @@ def gather_task(args: Namespace):
         os.makedirs(output_dir, exist_ok=True)
 
     file_map: dict[str, int] = {}
-    for text in tqdm(texts, maxinterval=1.0):
+    for text in tqdm_wrapper(texts):
         url = f'https://www.hispanicseminary.org/{text}'
 
         response = requests.get(url, verify=False)
@@ -98,9 +118,15 @@ def strfpath(path: str) -> str:
         return '\n'.join([line.strip() for line in f])
 
 
-# Left in global to be imported elsewhere
-CB_PAT = re.compile(r'\{CB\d+\.(.*?)\}', re.DOTALL)
+# Note: in global scope to be easily imported elsewhere
+FL_PAT = re.compile(r'\[fol\..*?\]')
+CB_PAT = re.compile(r'\{CB\d*\.(.*?)\}?', re.DOTALL)
+RB_PAT = re.compile(r'\{RUB[.:] ?(.*?) ?\}?', re.DOTALL)
+MN_PAT = re.compile(r'\{=?MIN=?[.:]?(.*?)\}', re.DOTALL)
+LT_PAT = re.compile(r' ?\{LAT\. ?(.*?) ?\}', re.DOTALL)
 IN_PAT = re.compile(r'\{IN(.*?)\.\}? ?', re.DOTALL)
+IL_PAT = re.compile(r'\{=?ILL=?\.(.*?)\}', re.DOTALL)
+BK_PAT = re.compile(r' ?[\[{]BLNK[.:](.*?)[}\]]?')
 CW_PAT = re.compile(r'\{CW. (.*?) ?\}')
 
 def clean_task(args: Namespace):
@@ -112,22 +138,35 @@ def clean_task(args: Namespace):
 
     def take_group(x):
         whole_match = x.group(0)
-        kept = x.group(1)
+        kept = x.group(1).strip()
         LOGGER.info(whole_match.replace(kept, ''))
         return kept
 
     def rm_and_log(x):
-        LOGGER.info(x.group(0))
+        LOGGER.info(x.group(0).replace('\n', ' '))
         return ''
 
     SUBSTITUTIONS: dict[re.Pattern, str | Callable] = {
+        FL_PAT: rm_and_log,
         CB_PAT: take_group,
+        RB_PAT: take_group,
+        MN_PAT: rm_and_log, # 1
+        LT_PAT: rm_and_log,
         IN_PAT: rm_and_log,
+        IL_PAT: take_group, # 2
+        BK_PAT: take_group,
         CW_PAT: take_group,
     }
+    # ^1 miniature not kept because it is unlikely that it will be usable for translation
+    # ^2 I have reservations about the usefulness of this data, but I will retain it for
+    #    now nonetheless
 
     cleaned_text = text
-    for pattern, replacement in SUBSTITUTIONS.items():
+    items = SUBSTITUTIONS.items() if not args.show_progress \
+        else tqdm_wrapper(SUBSTITUTIONS.items())
+
+    for pattern, replacement in items:
+        LOGGER.info(f'### BEGIN {pattern} ###')
         cleaned_text = re.sub(pattern, replacement, cleaned_text)
 
     try:
