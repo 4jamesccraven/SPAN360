@@ -128,6 +128,10 @@ IN_PAT = re.compile(r'\{IN(.*?)\.\}? ?', re.DOTALL)
 IL_PAT = re.compile(r'\{=?ILL=?\.(.*?)\}', re.DOTALL)
 BK_PAT = re.compile(r' ?[\[{]BLNK[.:](.*?)[}\]]?')
 CW_PAT = re.compile(r'\{CW. (.*?) ?\}')
+HD_PAT = re.compile(r'\{HD\d*\.(.*?)\}', re.DOTALL)
+DG_PAT = re.compile(r'\{=?DIAG=?\.?(.*?)\}', re.DOTALL)
+RK_PAT = re.compile(r'\{RMK:(.*?)\}', re.DOTALL)
+SY_PAT = re.compile(r'\{SYMB[.:](.*?)\}', re.DOTALL)
 
 def clean_task(args: Namespace):
     files = os.listdir('unproccessed_text')
@@ -156,6 +160,10 @@ def clean_task(args: Namespace):
         IL_PAT: take_group, # 2
         BK_PAT: take_group,
         CW_PAT: take_group,
+        HD_PAT: rm_and_log,
+        DG_PAT: rm_and_log,
+        RK_PAT: rm_and_log,
+        SY_PAT: rm_and_log,
     }
     # ^1 miniature not kept because it is unlikely that it will be usable for translation
     # ^2 I have reservations about the usefulness of this data, but I will retain it for
