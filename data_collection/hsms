@@ -132,6 +132,11 @@ HD_PAT = re.compile(r'\{HD\d*\.(.*?)\}', re.DOTALL)
 DG_PAT = re.compile(r'\{=?DIAG=?\.?(.*?)\}', re.DOTALL)
 RK_PAT = re.compile(r'\{RMK:(.*?)\}', re.DOTALL)
 SY_PAT = re.compile(r'\{SYMB[.:](.*?)\}', re.DOTALL)
+GL_PAT = re.compile(r'\{GL\.? ? (.*?)\}', re.DOTALL)
+AD_PAT = re.compile(r'\{AD\.? ? (.*?)\}', re.DOTALL)
+GR_PAT = re.compile(r'\{GRK\.? ? (.*?)\}', re.DOTALL)
+BR_PAT = re.compile(r'[{}]')
+AN_PAT = re.compile(r'<(.*?)>', re.DOTALL)
 
 def clean_task(args: Namespace):
     files = os.listdir('unproccessed_text')
@@ -164,6 +169,11 @@ def clean_task(args: Namespace):
         DG_PAT: rm_and_log,
         RK_PAT: rm_and_log,
         SY_PAT: rm_and_log,
+        GL_PAT: rm_and_log,
+        AD_PAT: rm_and_log,
+        GR_PAT: rm_and_log,
+        BR_PAT: rm_and_log,
+        AN_PAT: take_group,
     }
     # ^1 miniature not kept because it is unlikely that it will be usable for translation
     # ^2 I have reservations about the usefulness of this data, but I will retain it for
@@ -176,6 +186,8 @@ def clean_task(args: Namespace):
     for pattern, replacement in items:
         LOGGER.info(f'### BEGIN {pattern} ###')
         cleaned_text = re.sub(pattern, replacement, cleaned_text)
+
+    cleaned_text = '\n'.join([line for line in cleaned_text.splitlines() if line])
 
     try:
         if args.compare:
