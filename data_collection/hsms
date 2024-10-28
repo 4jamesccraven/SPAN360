@@ -137,6 +137,9 @@ AD_PAT = re.compile(r'\{AD\.? ? (.*?)\}', re.DOTALL)
 GR_PAT = re.compile(r'\{GRK\.? ? (.*?)\}', re.DOTALL)
 BR_PAT = re.compile(r'[{}]')
 AN_PAT = re.compile(r'<(.*?)>', re.DOTALL)
+CL_PAT = re.compile(r'% ?')
+BC_PAT = re.compile(r'\[%\]')
+ET_PAT = re.compile(r'&')
 
 def clean_task(args: Namespace):
     files = os.listdir('unproccessed_text')
@@ -174,10 +177,14 @@ def clean_task(args: Namespace):
         GR_PAT: rm_and_log,
         BR_PAT: rm_and_log,
         AN_PAT: take_group,
+        CL_PAT: rm_and_log,
+        BC_PAT: rm_and_log,
+        # ET_PAT: 'et',       # 3
     }
     # ^1 miniature not kept because it is unlikely that it will be usable for translation
     # ^2 I have reservations about the usefulness of this data, but I will retain it for
     #    now nonetheless
+    # ^3 I will reconsider this change once I have decided if/how I will use this data
 
     cleaned_text = text
     items = SUBSTITUTIONS.items() if not args.show_progress \
@@ -187,7 +194,8 @@ def clean_task(args: Namespace):
         LOGGER.info(f'### BEGIN {pattern} ###')
         cleaned_text = re.sub(pattern, replacement, cleaned_text)
 
-    cleaned_text = '\n'.join([line for line in cleaned_text.splitlines() if line])
+    cleaned_text = '\n'.join([line for line in cleaned_text.splitlines() if line]) \
+                       .replace('-\n', '')
 
     try:
         if args.compare:
