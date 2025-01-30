@@ -142,11 +142,13 @@ BC_PAT = re.compile(r'\[%\]')
 ET_PAT = re.compile(r'&')
 
 def clean_task(args: Namespace):
-    files = os.listdir('unproccessed_text')
-    files = [os.path.join('unproccessed_text', file) for file in files]
+    orig_files = os.listdir('unproccessed_text')
+    files = [os.path.join('unproccessed_text', file) for file in orig_files]
     files = [os.path.abspath(file) for file in files]
 
-    text = '\n'.join(strfpath(file) for file in files)
+    destinations = [os.path.join('cleaned_data', path) for path in orig_files]
+
+    text = {dest: strfpath(path) for dest, path in zip(destinations, files)}
 
     def take_group(x):
         whole_match = x.group(0)
@@ -186,25 +188,31 @@ def clean_task(args: Namespace):
     #    now nonetheless
     # ^3 I will reconsider this change once I have decided if/how I will use this data
 
-    cleaned_text = text
-    items = SUBSTITUTIONS.items() if not args.show_progress \
-        else tqdm_wrapper(SUBSTITUTIONS.items())
+    if not os.path.isdir('cleaned_data'):
+        os.mkdir('cleaned_data')
 
-    for pattern, replacement in items:
-        LOGGER.info(f'### BEGIN {pattern} ###')
-        cleaned_text = re.sub(pattern, replacement, cleaned_text)
+    for name, raw_text in text.items():
+        cleaned_text = raw_text
+        items = SUBSTITUTIONS.items() if not args.show_progress \
+            else tqdm_wrapper(SUBSTITUTIONS.items())
 
-    cleaned_text = '\n'.join([line for line in cleaned_text.splitlines() if line]) \
-                       .replace('-\n', '')
+        for pattern, replacement in items:
+            LOGGER.info(f'### BEGIN {pattern} ###')
+            cleaned_text = re.sub(pattern, replacement, cleaned_text)
 
-    try:
-        if args.compare:
-            for raw, clean in zip(text.splitlines(), cleaned_text.splitlines()):
-                print(f'{raw[:99]:<{99}} | {clean}')
-        else:
-            print(cleaned_text)
-    except BrokenPipeError:
-        ...
+        cleaned_text = '\n'.join([line for line in cleaned_text.splitlines() if line]) \
+                           .replace('-\n', '')
+
+        try:
+            if args.compare:
+                for raw, clean in zip(raw_text.splitlines(), cleaned_text.splitlines()):
+                    print(f'{raw[:99]:<{99}} | {clean}')
+            else:
+                with open(name, 'w', encoding='utf8') as f:
+                    f.write(cleaned_text)
+
+        except BrokenPipeError:
+            ...
 
 
 def main() -> None:
