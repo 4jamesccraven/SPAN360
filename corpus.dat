@@ -1,0 +1,93 @@
+# This is an intermediate representation of the corpus that can be compiled
+# to other formats. Each sentence starts with an identifier that shows which
+# verse of the bible it corresponds to, and is followed by a marker
+# indicating the source.
+
+# 1: Biblia Romanceada E6
+# 2: Reina-Valera 1960
+# 3: Nueva Versión Internacional
+
+# Mateo 1:1
+1:1:Est es el libro de la generacion de ihesu christo fide dauid el fide abraham.
+1:2:Libro de la genealogía de Jesucristo, hijo de David, hijo de Abraham.
+1:3:Registro genealógico de Jesucristo, hijo de David y de Abraham:
+
+# Mateo 1:2
+2:1:Abraham engendro a ysaac. ysaac engendro a iacob. Jacob engendro a iudas e sos ermanos.
+2:2:Abraham engendró a Isaac, Isaac a Jacob, y Jacob a Judá y a sus hermanos.
+2:3:Abraham fue el padre de Isaac; Isaac, padre de Jacob; Jacob, padre de Judá y de sus hermanos;
+
+# Mateo 1:3
+3:1:Judas engendro a fares. e azara en una mugier que ouo nombre thamar. Phares engendro a esrom. Esrom engendro a aram.
+3:2:Judá engendró de Tamar a Fares y a Zara, Fares a Esrom, y Esrom a Aram.
+3:3:Judá, padre de Fares y de Zera, cuya madre fue Tamar; Fares, padre de Jezrón; Jezrón, padre de Aram;
+
+# Mateo 1:4
+4:1:Aram engendro a aminadab. Aminadab engendro a naason. Naason engendro a salmon.
+4:2:Aram engendró a Aminadab, Aminadab a Naasón, y Naasón a Salmón.
+4:3:Aram, padre de Aminadab; Aminadab, padre de Naasón; Naasón, padre de Salmón;
+
+# Mateo 1:5
+5:1:Salmon engendro a booz en una mugier que ouo nombre raab. Booz engendro a obeth en una mugier que ouo nombre ruth. Obeth engendro a iesse.
+5:2:Salmón engendró de Rahab a Booz, Booz engendró de Rut a Obed, y Obed a Isaí.
+5:3:Salmón, padre de Booz, cuya madre fue Rajab; Booz, padre de Obed, cuya madre fue Rut; Obed, padre de Isaí
+
+# Mateo 1:6
+6:1:Jesse engendro. a dauid el rey. Dauid engendro a salomon en una que fue mugier de urias.
+6:2:Isaí engendró al rey David, y el rey David engendró a Salomón de la que fue mujer de Urías.
+6:3:e Isaí, padre del rey David. David fue el padre de Salomón, cuya madre había sido la esposa de Urías;
+
+# Mateo 1:7
+7:1:Salomon engendro a roboan. Roboan engendro a abias. Abias engendro a asa.
+7:2:Salomón engendró a Roboam, Roboam a Abías, y Abías a Asa.
+7:3:Salomón, padre de Roboán; Roboán, padre de Abías; Abías, padre de Asá;
+
+# Mateo 1:8
+8:1:Asa engendro a josapaht. Josaphat engendro a ioram. Joram engendro a ozias.
+8:2:Asa engendró a Josafat, Josafat a Joram, y Joram a Uzías.
+8:3:Asá, padre de Josafat; Josafat, padre de Jorán; Jorán, padre de Uzías;
+
+# Mateo 1:9
+9:1:Ozi-as engendro a ioathan. Joathan engendro a acaz. Acaz engendro a ezechias.
+9:2:Uzías engendró a Jotam, Jotam a Acaz, y Acaz a Ezequías.
+9:3:Uzías, padre de Jotán; Jotán, padre de Acaz; Acaz, padre de Ezequías;
+
+# Mateo 1:10
+10:1:Ezechias engendro a manassen. Manasses engendro a amon. Amon engendro a iosias.
+10:2:Ezequías engendró a Manasés, Manasés a Amón, y Amón a Josías.
+10:3:Ezequías, padre de Manasés; Manasés, padre de Amón; Amón, padre de Josías
+
+# Mateo 1:11
+11:1:Josias engendro a ieconias e sos ermanos. en el traspassamiento de babilonna.
+11:2:Josías engendró a Jeconías y a sus hermanos, en el tiempo de la deportación a Babilonia.
+11:3:y Josías, padre de Jeconías y de sus hermanos en tiempos de la deportación a Babilonia.
+
+# Mateo 1:12
+12:1:E depues del traspassamiento de babilonna. Jeconias engendro a salatiel. Salatiel engendro a zorobabel.
+12:2:Después de la deportación a Babilonia, Jeconías engendró a Salatiel, y Salatiel a Zorobabel.
+12:3:Después de la deportación a Babilonia: Jeconías fue el padre de Salatiel; Salatiel, padre de Zorobabel;
+
+# Mateo 1:13
+13:1:zorobabel engendro a abiut. Abiut engendro a eliachim. Eliachim engendro a azor.
+13:2:Zorobabel engendró a Abiud, Abiud a Eliaquim, y Eliaquim a Azor.
+13:3:Zorobabel, padre de Abiud; Abiud, padre de Eliaquín; Eliaquín, padre de Azor;
+
+# Mateo 1:14
+14:1:Azor engendro a sadoch. Sadoch engendro a achim. Achim engendro a eliut.
+14:2:Azor engendró a Sadoc, Sadoc a Aquim, y Aquim a Eliud.
+14:3:Azor, padre de Sadoc; Sadoc, padre de Aquín; Aquín, padre de Eliud;
+
+# Mateo 1:15
+15:1:Eliud engendro a eleazar. Eleazar engendro a Mathan. Mathan engendro a iacob.
+15:2:Eliud engendró a Eleazar, Eleazar a Matán, Matán a Jacob;
+15:3:Eliud, padre de Eleazar; Eleazar, padre de Matán; Matán, padre de Jacob
+
+# Mateo 1:16
+16:1:Jacob engendro a Joseph. marido de Santa maria. de la que nacio ihesus. el que es nombrado christo.
+16:2:y Jacob engendró a José, marido de María, de la cual nació Jesús, llamado el Cristo.
+16:3:y Jacob, padre de José, que fue el esposo de María, de la cual nació Jesús llamado el Cristo.
+
+# Mateo 1:17
+17:1:E todas las generaciones desde abraham fasta dauid fueron. catorze. e desde dauid fastal traspassamiento de babilonna; catorze generaciones. E del traspassamiento de babilonna fasta christo; fueron catorze generationes.
+17:2: De manera que todas las generaciones desde Abraham hasta David son catorce; desde David hasta la deportación a Babilonia, catorce; y desde la deportación a Babilonia hasta Cristo, catorce.
+17:3:Así que hubo en total catorce generaciones desde Abraham hasta David, catorce desde David hasta la deportación a Babilonia, y catorce desde la deportación hasta el Cristo.

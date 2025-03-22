@@ -1,2 +1,3 @@
-temp/*.html
-temp/*.txt
+data_collection/*.html
+data_collection/*.txt
+**/*.pyc
