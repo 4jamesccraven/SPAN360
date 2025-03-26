@@ -29,4 +29,4 @@ def tab_separated(sentences: list[SentencePairing]) -> str:
 
 @register_encoder
 def csv(sentences: list[SentencePairing]) -> str:
-    return '\n'.join(['old,modern'] + list(starmap(lambda l, r: f'{l},{r}', sentences)))
+    return '\n'.join(['old,modern'] + list(starmap(lambda l, r: f'\"{l}\",\"{r}\"', sentences)))

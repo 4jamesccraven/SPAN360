@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from itertools import product, filterfalse, groupby, tee 
 from operator import attrgetter
 from os import environ
-from sys import exception, stderr
+from sys import stderr
 from typing import Optional
 
 
