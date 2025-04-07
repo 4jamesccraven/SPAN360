@@ -15,8 +15,7 @@ def main() -> None:
     if sentence_pairings is not None:
         print(encoder(sentence_pairings))
     else:
-        print('Unable to load sentences',
-              file=stderr)
+        print('Unable to load sentences', file=stderr)
 
 
 if __name__ == '__main__':
